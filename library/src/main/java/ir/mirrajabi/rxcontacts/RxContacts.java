@@ -21,7 +21,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.util.LongSparseArray;
+
+import java.util.HashMap;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -70,8 +71,8 @@ public class RxContacts {
     }
 
 
-    private void fetch (ObservableEmitter emitter) {
-        LongSparseArray<Contact> contacts = new LongSparseArray<>();
+    private void fetch (ObservableEmitter<Contact> emitter) {
+        HashMap<Long, Contact> contacts = new HashMap<>();
         Cursor cursor = createCursor();
         cursor.moveToFirst();
         int idColumnIndex = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID);
@@ -84,7 +85,7 @@ public class RxContacts {
         int dataColumnIndex = cursor.getColumnIndex(ContactsContract.Data.DATA1);
         while (!cursor.isAfterLast()) {
             long id = cursor.getLong(idColumnIndex);
-            Contact contact = contacts.get(id, null);
+            Contact contact = contacts.get(id);
             if (contact == null) {
                 contact = new Contact(id);
                 mapInVisibleGroup(cursor, contact, inVisibleGroupColumnIndex);
@@ -108,8 +109,9 @@ public class RxContacts {
             cursor.moveToNext();
         }
         cursor.close();
-        for (int i = 0; i < contacts.size(); i++)
-            emitter.onNext(contacts.valueAt(i));
+        for (Long key : contacts.keySet()) {
+            emitter.onNext(contacts.get(key));
+        }
         emitter.onComplete();
     }
 
