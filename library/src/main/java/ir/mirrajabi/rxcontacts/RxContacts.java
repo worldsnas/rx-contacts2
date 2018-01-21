@@ -93,17 +93,16 @@ public class RxContacts {
                 mapPhoto(cursor, contact, photoColumnIndex);
                 mapThumbnail(cursor, contact, thumbnailColumnIndex);
                 contacts.put(id, contact);
-            } else {
-                String mimetype = cursor.getString(mimetypeColumnIndex);
-                switch (mimetype) {
-                    case ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE: {
-                        mapEmail(cursor, contact, dataColumnIndex);
-                        break;
-                    }
-                    case ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE: {
-                        mapPhoneNumber(cursor, contact, dataColumnIndex);
-                        break;
-                    }
+            }
+            String mimetype = cursor.getString(mimetypeColumnIndex);
+            switch (mimetype) {
+                case ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE: {
+                    mapEmail(cursor, contact, dataColumnIndex);
+                    break;
+                }
+                case ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE: {
+                    mapPhoneNumber(cursor, contact, dataColumnIndex);
+                    break;
                 }
             }
             cursor.moveToNext();
