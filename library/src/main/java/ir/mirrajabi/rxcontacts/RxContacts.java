@@ -21,8 +21,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-
-import java.util.HashMap;
+import android.util.LongSparseArray;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -39,11 +38,12 @@ import static ir.mirrajabi.rxcontacts.ColumnMapper.mapThumbnail;
 
 /**
  * Android contacts as rx observable.
+ *
  * @author Ulrich Raab
  * @author MADNESS
  */
 public class RxContacts {
-    private static final String[] PROJECTION = {
+    private final String[] PROJECTION = {
             ContactsContract.Data.CONTACT_ID,
             ContactsContract.Data.DISPLAY_NAME_PRIMARY,
             ContactsContract.Data.STARRED,
@@ -56,11 +56,11 @@ public class RxContacts {
 
     private ContentResolver mResolver;
 
-    public static Observable<Contact> fetch (@NonNull final Context context) {
+    public static Observable<Contact> fetch(@NonNull final Context context) {
         return Observable.create(new ObservableOnSubscribe<Contact>() {
             @Override
             public void subscribe(@io.reactivex.annotations.NonNull
-                                          ObservableEmitter<Contact> e) throws Exception {
+                                          ObservableEmitter<Contact> e) {
                 new RxContacts(context).fetch(e);
             }
         });
@@ -71,10 +71,11 @@ public class RxContacts {
     }
 
 
-    private void fetch (ObservableEmitter<Contact> emitter) {
-        HashMap<Long, Contact> contacts = new HashMap<>();
+    private void fetch(ObservableEmitter<Contact> emitter) {
+        LongSparseArray<Contact> contacts = new LongSparseArray<>();
         Cursor cursor = createCursor();
         cursor.moveToFirst();
+
         int idColumnIndex = cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID);
         int inVisibleGroupColumnIndex = cursor.getColumnIndex(ContactsContract.Data.IN_VISIBLE_GROUP);
         int displayNamePrimaryColumnIndex = cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME_PRIMARY);
@@ -83,6 +84,7 @@ public class RxContacts {
         int thumbnailColumnIndex = cursor.getColumnIndex(ContactsContract.Data.PHOTO_THUMBNAIL_URI);
         int mimetypeColumnIndex = cursor.getColumnIndex(ContactsContract.Data.MIMETYPE);
         int dataColumnIndex = cursor.getColumnIndex(ContactsContract.Data.DATA1);
+
         while (!cursor.isAfterLast()) {
             long id = cursor.getLong(idColumnIndex);
             Contact contact = contacts.get(id);
@@ -109,13 +111,15 @@ public class RxContacts {
             cursor.moveToNext();
         }
         cursor.close();
-        for (Long key : contacts.keySet()) {
-            emitter.onNext(contacts.get(key));
+
+        for (int i = 0; i < contacts.size(); i++) {
+            emitter.onNext(contacts.valueAt(i));
         }
+
         emitter.onComplete();
     }
 
-    private Cursor createCursor () {
+    private Cursor createCursor() {
         return mResolver.query(
                 ContactsContract.Data.CONTENT_URI,
                 PROJECTION,
