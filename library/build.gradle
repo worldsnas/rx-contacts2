@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
-//apply plugin: 'com.github.dcendents.android-maven'
-//group = 'com.github.mirrajabi'
+apply plugin: 'com.github.dcendents.android-maven'
+group = 'com.github.worldsnas'
 
 android {
     compileSdkVersion 27
@@ -22,7 +22,6 @@ android {
 }
 
 dependencies {
-//    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "io.reactivex.rxjava2:rxjava:2.1.6"
     implementation 'com.android.support:support-annotations:27.1.1'
 }

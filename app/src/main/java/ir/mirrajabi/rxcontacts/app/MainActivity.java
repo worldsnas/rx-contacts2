@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private void initializeRecyclerView () {
         ContactAdapter contactAdapter = getContactAdapter();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        RecyclerView rv = (RecyclerView) findViewById(R.id.recyclerView_contacts);
+        RecyclerView rv = findViewById(R.id.recyclerView_contacts);
         if (rv != null) {
             rv.setAdapter(contactAdapter);
             rv.setLayoutManager(linearLayoutManager);
