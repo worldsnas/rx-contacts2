@@ -17,9 +17,12 @@ package ir.mirrajabi.rxcontacts;
 
 
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -28,15 +31,15 @@ import java.util.Set;
  * @author MADNESS
  */
 
-public class Contact implements Comparable<Contact> {
+public class Contact implements Comparable<Contact>,Parcelable {
     private final long mId;
     private int mInVisibleGroup;
     private String mDisplayName;
     private boolean mStarred;
     private Uri mPhoto;
     private Uri mThumbnail;
-    private Set<String> mEmails = new HashSet<>();
-    private Set<String> mPhoneNumbers = new HashSet<>();
+    private List<String> mEmails = new ArrayList<>();
+    private List<String> mPhoneNumbers = new ArrayList<>();
 
     Contact(long id) {
         this.mId = id;
@@ -86,25 +89,25 @@ public class Contact implements Comparable<Contact> {
         mThumbnail = thumbnail;
     }
 
-    public Set<String> getEmails() {
+    public List<String> getEmails() {
         return mEmails;
     }
 
-    public void setEmails(Set<String> emails) {
+    public void setEmails(List<String> emails) {
         mEmails = emails;
     }
 
-    public Set<String> getPhoneNumbers() {
+    public List<String> getPhoneNumbers() {
         return mPhoneNumbers;
     }
 
-    public void setPhoneNumbers(Set<String> phoneNumbers) {
+    public void setPhoneNumbers(List<String> phoneNumbers) {
         mPhoneNumbers = phoneNumbers;
     }
 
 
     @Override
-    public int compareTo(Contact other) {
+    public int compareTo(@NonNull Contact other) {
         if(mDisplayName != null && other.mDisplayName != null)
             return mDisplayName.compareTo(other.mDisplayName);
         else return -1;
@@ -126,4 +129,45 @@ public class Contact implements Comparable<Contact> {
         Contact contact = (Contact) o;
         return mId == contact.mId;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.mId);
+        dest.writeInt(this.mInVisibleGroup);
+        dest.writeString(this.mDisplayName);
+        dest.writeByte(this.mStarred ? (byte) 1 : (byte) 0);
+        dest.writeParcelable(this.mPhoto, flags);
+        dest.writeParcelable(this.mThumbnail, flags);
+        dest.writeStringList(this.mEmails);
+        dest.writeStringList(this.mPhoneNumbers);
+    }
+
+    private Contact(Parcel in) {
+        this.mId = in.readLong();
+        this.mInVisibleGroup = in.readInt();
+        this.mDisplayName = in.readString();
+        this.mStarred = in.readByte() != 0;
+        this.mPhoto = in.readParcelable(Uri.class.getClassLoader());
+        this.mThumbnail = in.readParcelable(Uri.class.getClassLoader());
+        this.mEmails = in.createStringArrayList();
+        this.mPhoneNumbers = in.createStringArrayList();
+    }
+
+    public static final Parcelable.Creator<Contact> CREATOR = new Parcelable.Creator<Contact>() {
+        @Override
+        public Contact createFromParcel(Parcel source) {
+            return new Contact(source);
+        }
+
+        @Override
+        public Contact[] newArray(int size) {
+            return new Contact[size];
+        }
+    };
 }
